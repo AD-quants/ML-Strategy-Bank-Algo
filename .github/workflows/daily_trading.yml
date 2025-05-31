@@ -1,0 +1,71 @@
+name: Daily ML Trading Strategy
+
+on:
+  schedule:
+    # Run at 4:05 PM ET (9:05 PM UTC) after market close
+    - cron: '5 21 * * 1-5'  # Monday to Friday
+  
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  run-trading-strategy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential wget
+    
+    - name: Install TA-Lib
+      run: |
+        wget http://prdownloads.sourceforge.net/ta-lib/ta-lib-0.4.0-src.tar.gz
+        tar -xzf ta-lib-0.4.0-src.tar.gz
+        cd ta-lib
+        ./configure --prefix=/usr
+        make
+        sudo make install
+        sudo ldconfig
+        cd ..
+    
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install TA-Lib
+    
+    - name: Run Trading Analysis
+      env:
+        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        EMAIL_USERNAME: ${{ secrets.EMAIL_USERNAME }}
+        EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+        EMAIL_TO: ${{ secrets.EMAIL_TO }}
+      run: |
+        python trading_bot.py
+    
+    - name: Upload Results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: trading-results-${{ github.run_number }}
+        path: |
+          results/
+          *.log
+        retention-days: 30
+    
+    - name: Commit Results
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action Bot"
+        git add results/ || true
+        git diff --staged --quiet || git commit -m "📊 Daily analysis results $(date +%Y-%m-%d)"
+        git push || echo "Nothing to commit"
