@@ -35,12 +35,12 @@ jobs:
         sudo make install
         sudo ldconfig
         cd ..
-    
+
     - name: Install Python dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install TA-Lib
+  run: |
+    python -m pip install --upgrade pip
+    pip install TA-Lib
+    pip install -r requirements.txt
     
     - name: Run Trading Analysis
       env:
