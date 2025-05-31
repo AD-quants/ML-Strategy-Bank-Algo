@@ -1,0 +1,21 @@
+{
+  "symbols": ["^GSPC", "SPY", "QQQ", "IWM"],
+  "lookback_days": 730,
+  "initial_capital": 100000,
+  "risk_per_trade": 0.02,
+  "notifications": {
+    "telegram": {
+      "enabled": true,
+      "bot_token": "",
+      "chat_id": ""
+    },
+    "email": {
+      "enabled": false,
+      "smtp_server": "smtp.gmail.com",
+      "smtp_port": 587,
+      "username": "",
+      "password": "",
+      "to_email": ""
+    }
+  }
+}
