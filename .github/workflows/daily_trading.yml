@@ -2,7 +2,7 @@ name: Daily ML Trading Strategy
 on:
   schedule:
     # Run at 4:05 PM ET (9:05 PM UTC) after market close
-    - cron: '5 21 * *1-5'  # Monday to Friday
+    - cron: '5 21 * * 1-5'  # Monday to Friday
   
   workflow_dispatch:  # Allow manual trigger
 jobs:
