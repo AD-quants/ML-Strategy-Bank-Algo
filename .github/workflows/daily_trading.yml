@@ -21,18 +21,27 @@ jobs:
     - name: Install system dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y build-essential wget
+        sudo apt-get install -y build-essential wget curl
     
     - name: Install TA-Lib
       run: |
+        # Download and install TA-Lib
+        cd /tmp
         wget http://prdownloads.sourceforge.net/ta-lib/ta-lib-0.4.0-src.tar.gz
         tar -xzf ta-lib-0.4.0-src.tar.gz
-        cd ta-lib
-        ./configure --prefix=/usr
+        cd ta-lib/
+        ./configure --prefix=/usr/local
         make
         sudo make install
+        # Update library path
+        echo '/usr/local/lib' | sudo tee -a /etc/ld.so.conf
         sudo ldconfig
-        cd ..
+        # Verify installation
+        ls -la /usr/local/lib/libta_*
+        # Set environment variables
+        echo "LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
+        echo "TA_LIBRARY_PATH=/usr/local/lib" >> $GITHUB_ENV
+        echo "TA_INCLUDE_PATH=/usr/local/include" >> $GITHUB_ENV
     
     - name: Install Python dependencies
       run: |
